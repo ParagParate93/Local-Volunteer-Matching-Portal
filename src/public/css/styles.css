@@ -1,0 +1,55 @@
+/* General Styles */
+ body {
+    font-family:  "Playwrite GB S", serif;
+    /*background-image: url('/assets/background/background.jpg');*/
+    background-color: powderblue;
+  }
+  
+  .custom-navbar {
+    /*background-image: url('/assets/background/Background.png'); */
+    background-color: powderblue;
+    background-size: cover;
+    background-position: center;
+}
+
+.container {
+  max-width: 1350px;
+  margin-top: 25px;
+}
+
+.btn{
+    margin-top: 30px;
+    margin-bottom: 140px;
+}
+
+  /* Card Styling */
+  .card {
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-10px);
+  }
+  
+  /* Footer */
+  footer {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    padding: 1rem 0;
+  }
+  
+  .btn-primary:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cause-environment {
+    background-color: #D4ECDD;
+  }
+  .cause-education {
+    background-color: #CDE7F0;
+  }
+  .cause-healthcare {
+    background-color: #F0CDE7;
+  }
+

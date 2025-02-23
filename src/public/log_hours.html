@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volunteer Hour Logging</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/favicon/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Arima:wght@100..700&family=Dancing+Script:wght@400..700&family=Kablammo&family=Playwrite+GB+S:ital,wght@0,100..400;1,100..400&family=Rubik+Wet+Paint&display=swap" rel="stylesheet">
+  <style>
+    .container {
+      max-width: 800px;
+    }
+    .header {
+      text-align: center;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+
+
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: aquamarine;">
+  <div class="container">
+    <a class="navbar-brand" href="contact.html">VolunteerMatch</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="opportunities.html">Opportunities</a></li>
+        <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a>
+        <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>  
+
+<div class="container">
+  <div class="header">
+    <h2>Volunteer Hour Logging</h2>
+    <p>Log your volunteer hours and track your cumulative contributions.</p>
+  </div>
+
+
+  <form id="logHoursForm">
+    <div class="form-row">
+      <div class="form-group col-md-6 mb-3">
+        <label for="event">Event</label>
+        <select class="form-control" id="event" required>
+          <option value="">Select Event...</option>
+          <option value="Community-cleanup">Community Cleanup</option>
+          <option value="Animal-shelter">Animal Shelter Support</option>
+          <option value="Food-drive">Food Drive</option>
+        </select>
+      </div>
+      <div class="form-group col-md-6 mb-3">
+        <label for="date">Date</label>
+        <input type="date" class="form-control" id="date" required>
+      </div>
+    </div>
+    <div class="form-group mb-3">
+      <label for="hours">Hours Spent</label>
+      <input type="number" class="form-control" id="hours" placeholder="e.g., 3 or 4 " required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Log Hours</button>
+  </form>
+
+
+  <div class="table-container">
+    <h4 class="mt-4">Your Logged Hours</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Date</th>
+          <th>Hours</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="loggedHoursTable">
+
+
+      </tbody>
+    </table>
+  </div>
+
+
+  <div class="cumulative-hours mt-3">
+    <h5>Total Hours Contributed: <span id="totalHours">0</span></h5>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<!-- <script src="js/main.js"></script> -->
+
+<script>
+
+document.getElementById('logHoursForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    
+    
+    const eventValue = document.getElementById('event').value;
+    const dateValue = document.getElementById('date').value;
+    const hoursValue = parseFloat(document.getElementById('hours').value);
+    
+  
+    const table = document.getElementById('loggedHoursTable');
+    const row = table.insertRow();
+    row.innerHTML = `
+      <td>${eventValue}</td>
+      <td>${dateValue}</td>
+      <td>${hoursValue}</td>
+      <td>
+        <button class="btn btn-sm btn-warning editBtn">Edit</button>
+        <button class="btn btn-sm btn-danger deleteBtn">Delete</button>
+      </td>
+    `;
+    
+ 
+    row.querySelector('.editBtn').addEventListener('click', function() {
+      document.getElementById('event').value = eventValue;
+      document.getElementById('date').value = dateValue;
+      document.getElementById('hours').value = hoursValue;
+      row.remove();
+      updateTotalHours(-hoursValue); 
+    });
+
+    row.querySelector('.deleteBtn').addEventListener('click', function() {
+      row.remove();
+      updateTotalHours(-hoursValue); 
+    });
+   
+
+    updateTotalHours(hoursValue); 
+    document.getElementById('logHoursForm').reset();
+    alert("Hours logged successfully!");
+  });
+
+
+function updateTotalHours(value) {
+    const totalHoursElement = document.getElementById('totalHours');
+    let totalHours = parseFloat(localStorage.getItem('totalHours')) || 0;
+    totalHours += value;
+    totalHoursElement.innerText = totalHours.toFixed(1);
+    localStorage.setItem('totalHours', totalHours.toFixed(1));
+}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const totalHours = parseFloat(localStorage.getItem('totalHours')) || 0;
+    document.getElementById('totalHours').innerText = totalHours.toFixed(1);
+});
+
+</script>
+
+</body>
+</html>

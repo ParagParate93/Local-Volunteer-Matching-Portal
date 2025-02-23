@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Add Opportunities</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/favicon/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Arima:wght@100..700&family=Dancing+Script:wght@400..700&family=Kablammo&family=Playwrite+GB+S:ital,wght@0,100..400;1,100..400&family=Rubik+Wet+Paint&display=swap" rel="stylesheet">
+  <style>
+    .header {
+      text-align: center;
+      padding: 40px 0px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: aquamarine;">
+  <div class="container">
+    <a class="navbar-brand" href="#">VolunteerMatch</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="opportunities.html">Opportunities</a></li>
+        <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>  
+
+<div class="container">
+  <div class="header mb-4">
+    <h2>Admin: Add New Volunteer Opportunity</h2>
+    <p>Fill out the form below to add a new volunteering opportunity.</p>
+  </div>
+  
+  <form id="addOpportunityForm" enctype="multipart/form-data">
+    <input type="hidden" id="opportunityId" name="opportunityId" value="">
+    <div class="form-group mb-3">
+      <label for="title">Opportunity Title</label>
+      <input type="text" class="form-control" id="title" name="title" placeholder="Enter opportunity title" required minlength="5" maxlength="100">
+    </div>
+    <div class="form-group mb-3">
+      <label for="description">Description</label>
+      <textarea class="form-control" id="description" name="description" rows="4" placeholder="Describe the opportunity and responsibilities" required minlength="10" maxlength="100"></textarea>
+    </div>
+    <div class="form-group mb-3">
+      <label for="location">Location</label>
+      <input type="text" class="form-control" id="location" name="location" placeholder="e.g., Community Center" required maxlength="100">
+    </div>
+    <div class="form-group mb-3">
+      <label for="requirements">Requirements</label>
+      <input type="text" class="form-control" id="requirements" name="requirements" placeholder="e.g., Minimum age 18" required maxlength="100">
+    </div>
+    <div class="form-group mb-3">
+      <label for="date">Date</label>
+      <input type="date" class="form-control" id="date" name="date" required min="2024-01-01">
+    </div>
+    <div class="form-group mb-3">
+      <label for="imageUpload">Upload Image</label>
+      <input type="file" class="form-control" id="imageUpload" name="image" accept="image/*">
+      <img id="imagePreview" src="" alt="Current Image Preview" style="max-width: 100%; margin-top: 10px; display: none;">
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Submit Opportunity</button>
+  </form>
+  
+  <div class="display mt-5 mb-4">
+    <h4>Existing Opportunities</h4>
+    <table class="table table-striped mt-4 mb-3">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>Location</th>
+          <th>Requirements</th>
+          <th>Date</th>
+          <th>Image</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="opportunitiesTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+
+<script>
+window.onload = fetchOpportunities;
+
+async function fetchOpportunities() {
+  const response = await fetch('http://127.0.0.1:7600/api/getAll');
+  const opportunities = await response.json();
+  
+  const table = document.getElementById('opportunitiesTable');
+  table.innerHTML = '';
+
+  opportunities.forEach((opportunity) => {
+    const row = table.insertRow();
+    row.innerHTML = `
+      <td>${opportunity.title}</td>
+      <td>${opportunity.description}</td>
+      <td>${opportunity.location}</td>
+      <td>${opportunity.requirements}</td>
+      <td>${opportunity.date}</td>
+      <td><img src="data:image/jpeg;base64,${opportunity.image}" width="50" alt="Opportunity Image"></td>
+      <td>
+        <button class="btn btn-sm btn-warning editBtn mb-3" onclick="editOpportunity(${opportunity.id})">Edit</button>
+        <button class="btn btn-sm btn-danger deleteBtn mb-3" onclick="deleteOpportunity(${opportunity.id})">Delete</button>
+      </td>
+    `;
+  });
+}
+
+async function addOpportunity(event) {
+  event.preventDefault();
+
+  const formData = new FormData(document.getElementById('addOpportunityForm'));
+  const base64Image = formData.get('image') ? await convertToBase64(formData.get('image')) : document.getElementById('imagePreview').src.split(',')[1];
+  const id = document.getElementById('opportunityId').value;
+
+  const opportunity = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    location: formData.get('location'),
+    requirements: formData.get('requirements'),
+    date: formData.get('date'),
+    image: base64Image
+  };
+
+  let response;
+  if (id) {
+    // Update existing opportunity
+    response = await fetch(`http://127.0.0.1:7600/api/update/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(opportunity)
+    });
+  } else {
+    // Save new opportunity
+    response = await fetch('http://127.0.0.1:7600/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(opportunity)
+    });
+  }
+
+  // ****************** Handle server response and show message ******************
+  const result = await response.json();
+  if (response.ok) {
+    alert(result.message); // Display success message
+  } else {
+    alert(result.message || "Failed to save opportunity"); // Display error message
+  }
+
+  // Reset form and fetch updated opportunities list
+  document.getElementById('addOpportunityForm').reset();
+  document.getElementById('opportunityId').value = '';
+  document.getElementById('imagePreview').style.display = 'none';
+  fetchOpportunities();
+}
+
+
+async function deleteOpportunity(id) {
+  let response = await fetch(`http://127.0.0.1:7600/api/delete/${id}`, { method: 'DELETE' });
+  const result = await response.json();
+  if (response.ok) {
+    alert(result.message); // Display success message
+  } else {
+    alert(result.message || "Failed to delete opportunity"); // Display error message
+  }
+  
+  fetchOpportunities();
+}
+
+function convertToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function editOpportunity(id) {
+  fetch(`http://127.0.0.1:7600/api/getAll`)
+    .then(response => response.json())
+    .then(opportunities => {
+      const opportunity = opportunities.find(op => op.id === id);
+      if (opportunity) {
+        document.getElementById('opportunityId').value = opportunity.id;
+        document.getElementById('title').value = opportunity.title;
+        document.getElementById('description').value = opportunity.description;
+        document.getElementById('location').value = opportunity.location;
+        document.getElementById('requirements').value = opportunity.requirements;
+        document.getElementById('date').value = opportunity.date;
+
+        const imagePreview = document.getElementById('imagePreview');
+        imagePreview.src = `data:image/jpeg;base64,${opportunity.image}`;
+        imagePreview.style.display = 'block';
+      } else {
+        alert('Opportunity not found!');
+      }
+    });
+}
+
+document.getElementById('addOpportunityForm').addEventListener('submit', addOpportunity);
+</script>
+
+</body>
+</html>
